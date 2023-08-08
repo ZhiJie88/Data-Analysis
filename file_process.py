@@ -97,7 +97,8 @@ def plot_data():
 
         plt.show()
     except Exception as e:
-        messagebox.showerror("Error", str(e))
+        messagebox.showerror("Error", "An error occurred while plotting the data.")
+
 
 # Create the main window
 window = tk.Tk()
