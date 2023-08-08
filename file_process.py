@@ -44,8 +44,8 @@ def set_y_columns(event):
 
 def plot_data():
     try:
-        if len(selected_x_columns) < 1:
-            messagebox.showwarning("Invalid Selection", "Please select an x-column.")
+        if len(selected_x_columns) != 1:
+            messagebox.showwarning("Invalid Selection", "Please select exactly one x-column.")
             return
         if len(selected_y_columns) < 1:
             messagebox.showwarning("Invalid Selection", "Please select at least one y-column.")
@@ -63,11 +63,11 @@ def plot_data():
                 df.dropna(subset=selected_x_columns + selected_y_columns, inplace=True)  # Remove rows with missing values in selected columns
 
                 if x_min is None:
-                    x_min = df[selected_x_columns].min().min()
-                    x_max = df[selected_x_columns].max().max()
+                    x_min = df[selected_x_columns[0]].min()
+                    x_max = df[selected_x_columns[0]].max()
                 else:
-                    x_min = min(x_min, df[selected_x_columns].min().min())
-                    x_max = max(x_max, df[selected_x_columns].max().max())
+                    x_min = min(x_min, df[selected_x_columns[0]].min())
+                    x_max = max(x_max, df[selected_x_columns[0]].max())
 
                 for y_col in selected_y_columns:
                     plt.plot(df[selected_x_columns[0]], df[y_col], 'o', markersize=2, label=os.path.basename(file_path))
