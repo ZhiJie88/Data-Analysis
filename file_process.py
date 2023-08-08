@@ -44,8 +44,8 @@ def set_y_columns(event):
 
 def plot_data():
     try:
-        if len(selected_x_columns) != 1:
-            messagebox.showwarning("Invalid Selection", "Please select exactly one x-column.")
+        if len(selected_x_columns) < 1 or len(selected_x_columns) > 1:
+            messagebox.showwarning("Invalid Selection", "Please select an x-column.")
             return
         if len(selected_y_columns) < 1:
             messagebox.showwarning("Invalid Selection", "Please select at least one y-column.")
@@ -60,14 +60,15 @@ def plot_data():
             try:
                 df = pd.read_csv(file_path.strip())
                 
-                df.dropna(subset=selected_x_columns + selected_y_columns, inplace=True)  # Remove rows with missing values in selected columns
+                # Remove rows with missing values
+                df.dropna(subset=selected_x_columns + selected_y_columns, inplace=True)
 
                 if x_min is None:
-                    x_min = df[selected_x_columns[0]].min()
-                    x_max = df[selected_x_columns[0]].max()
+                    x_min = df[selected_x_columns].min().min()
+                    x_max = df[selected_x_columns].max().max()
                 else:
-                    x_min = min(x_min, df[selected_x_columns[0]].min())
-                    x_max = max(x_max, df[selected_x_columns[0]].max())
+                    x_min = min(x_min, df[selected_x_columns].min().min())
+                    x_max = max(x_max, df[selected_x_columns].max().max())
 
                 for y_col in selected_y_columns:
                     plt.plot(df[selected_x_columns[0]], df[y_col], 'o', markersize=2, label=os.path.basename(file_path))
@@ -97,8 +98,7 @@ def plot_data():
 
         plt.show()
     except Exception as e:
-        messagebox.showerror("Error", "An error occurred while plotting the data.")
-
+        messagebox.showerror("Error", str(e))
 
 # Create the main window
 window = tk.Tk()
