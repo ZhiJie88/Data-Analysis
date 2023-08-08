@@ -70,7 +70,7 @@ def plot_data():
                     x_max = max(x_max, df[selected_x_column].max())
 
                 for y_col in selected_y_columns:
-                    plt.plot(df[selected_x_column], df[y_col], 'o', markersize=2, label=f"{y_col} - {os.path.basename(file_path)}")
+                    plt.plot(df[selected_x_column], df[y_col], 'o', markersize=2, label=f"{y_col}")
 
             except pd.errors.ParserError as pe:
                 messagebox.showwarning("Invalid Data", f"Skipped {os.path.basename(file_path)}: {str(pe)}")
