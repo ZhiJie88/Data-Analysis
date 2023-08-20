@@ -1,100 +1,73 @@
-function csvFilePlotter()
+% Clear workspace and close all figures
+clear;
+close all;
 
-    selectedFiles = {};     % Store the selected file paths
-    selectedXColumn = '';   % Store the selected x-column
-    selectedYColumns = {};  % Store the selected y-columns
+% Create the main GUI figure
+mainFigure = figure('Name', 'CSV Data Plotter', 'Position', [100, 100, 400, 300]);
 
-    % Create the main figure window
-    fig = figure('Name', 'CSV File Plotter', 'Position', [100, 100, 600, 400]);
+% Create listbox for file selection
+fileListbox = uicontrol('Style', 'listbox', 'Position', [20, 150, 150, 120], 'String', {}, 'Max', 2);
 
-    % Create the "Browse" button
-    btnBrowse = uicontrol('Style', 'pushbutton', 'String', 'Browse', ...
-        'Position', [20, 320, 80, 30], 'Callback', @browseFiles);
+% Create button to load files
+loadButton = uicontrol('Style', 'pushbutton', 'Position', [20, 120, 100, 20], 'String', 'Load Files', 'Callback', @loadFiles);
 
-    % Create the file listbox
-    fileListbox = uicontrol('Style', 'listbox', 'Position', [120, 320, 400, 60]);
+% Create axis for plotting
+plotAxis = axes('Position', [0.4, 0.1, 0.55, 0.7]);
 
-    % Create the "X Column Selection" label
-    labelXColumns = uicontrol('Style', 'text', 'String', 'X Column:', ...
-        'Position', [20, 260, 80, 20]);
+% Initialize variables to store data
+data = cell(0, 2); % Cell array to store data: {filename, data}
 
-    % Create the "X Columns" popup menu
-    popupXColumns = uicontrol('Style', 'popupmenu', 'Position', [120, 260, 400, 20]);
+% Callback function for the Load Files button
+function loadFiles(~, ~)
+    % Get a list of CSV files in the current directory
+    csvFiles = dir('*.csv');
+    
+    % Populate the listbox with file names
+    fileNames = {csvFiles.name};
+    set(fileListbox, 'String', fileNames, 'Value', []);
+end
 
-    % Create the "Y Column Selection" label
-    labelYColumns = uicontrol('Style', 'text', 'String', 'Y Columns:', ...
-        'Position', [20, 200, 80, 20]);
+% Callback function for listbox selection
+set(fileListbox, 'Callback', @selectFile);
 
-    % Create the "Y Columns" listbox
-    listboxYColumns = uicontrol('Style', 'listbox', 'Position', [120, 200, 400, 80], ...
-        'Max', 2, 'Min', 0);
-
-    % Create the "Plot" button
-    btnPlot = uicontrol('Style', 'pushbutton', 'String', 'Plot', ...
-        'Position', [20, 140, 80, 30], 'Callback', @plotData);
-
-    function browseFiles(~, ~)
-        [filePaths, ~] = uigetfile('*.csv', 'Select CSV Files', 'MultiSelect', 'on');
-        if isequal(filePaths, 0)
-            return;
-        end
-        selectedFiles = filePaths;
-        set(fileListbox, 'String', selectedFiles);
-        updateColumnSelector();
+function selectFile(~, ~)
+    selectedIndices = get(fileListbox, 'Value');
+    
+    % Clear previous data
+    data = cell(0, 2);
+    
+    % Read data from selected CSV files and store in 'data' variable
+    for i = selectedIndices
+        filename = csvFiles(i).name;
+        fileData = csvread(filename);
+        data{end+1, 1} = filename;
+        data{end, 2} = fileData;
     end
+    
+    % Update the plot with the selected data
+    plotSelectedData(data);
+end
 
-    function updateColumnSelector()
-        set(popupXColumns, 'String', {});
-        set(listboxYColumns, 'String', {});
-        if ~isempty(selectedFiles)
-            try
-                data = readtable(selectedFiles{1});
-                columns = data.Properties.VariableNames;
-                set(popupXColumns, 'String', columns);
-                set(listboxYColumns, 'String', columns);
-            catch
-                errordlg('Error reading CSV file.', 'Error');
-            end
+% Callback function to plot selected data
+function plotSelectedData(selectedData)
+    cla(plotAxis); % Clear the plot
+    
+    hold(plotAxis, 'on');
+    for i = 1:length(selectedData)
+        filename = selectedData{i, 1};
+        fileData = selectedData{i, 2};
+        
+        xData = fileData(:, 1);
+        yData = fileData(:, 2:end);
+        
+        for j = 1:size(yData, 2)
+            plot(plotAxis, xData, yData(:, j), 'DisplayName', [filename, ' - Y', num2str(j)]);
         end
     end
-
-    function plotData(~, ~)
-        selectedXColumnIndex = get(popupXColumns, 'Value');
-        selectedXColumn = char(get(popupXColumns, 'String')(selectedXColumnIndex));
-        selectedYColumns = get(listboxYColumns, 'String');
-        
-        if isempty(selectedXColumn)
-            errordlg('Please select an x-column.', 'Error');
-            return;
-        end
-        
-        if isempty(selectedYColumns)
-            errordlg('Please select at least one y-column.', 'Error');
-            return;
-        end
-        
-        figure;
-        hold on;
-
-        for i = 1:length(selectedFiles)
-            try
-                data = readtable(selectedFiles{i});
-                selectedColumns = [selectedXColumn, selectedYColumns];
-                data = data(:, selectedColumns);
-                
-                plot(data.(selectedXColumn), data{:, selectedYColumns}, 'o');
-                
-            catch
-                continue;
-            end
-        end
-        
-        hold off;
-        xlabel(selectedXColumn);
-        ylabel('Selected Y Columns');
-        title(['Data from CSV Files: ', selectedXColumn, ' vs ', strjoin(selectedYColumns, ', ')]);
-        legend(selectedYColumns);
-        grid on;
-    end
-
+    hold(plotAxis, 'off');
+    
+    xlabel(plotAxis, 'X Axis');
+    ylabel(plotAxis, 'Y Axis');
+    title(plotAxis, 'Multiple CSV Files Plot');
+    legend(plotAxis, 'Location', 'best');
 end
