@@ -11,6 +11,9 @@ function CSVDataPlotter
     % Create axis for plotting
     plotAxis = axes('Parent', mainFigure, 'Position', [0.4, 0.1, 0.55, 0.7]);
 
+    % Initialize variables
+    csvFiles = []; % To store CSV file information
+
     % Callback function for the Load Files button
     function loadFiles(~, ~)
         % Get a list of CSV files in the current directory
@@ -20,7 +23,7 @@ function CSVDataPlotter
         fileNames = {csvFiles.name};
 
         % Update listbox with file names
-        set(fileListbox, 'String', fileNames, 'Value', []);
+        set(fileListbox, 'String', fileNames, 'Value', 1); % Set default selection
     end
 
     % Callback function for listbox selection
