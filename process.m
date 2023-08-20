@@ -12,9 +12,9 @@ fileListbox = uicontrol('Style', 'listbox', 'Position', [20, 150, 150, 120], 'St
 loadButton = uicontrol('Style', 'pushbutton', 'Position', [20, 120, 100, 20], 'String', 'Load Files', 'Callback', @loadFiles);
 
 % Create axis for plotting
-plotAxis = axes('Position', [0.4, 0.1, 0.55, 0.7]);
+plotAxis = axes('Parent', mainFigure, 'Position', [0.4, 0.1, 0.55, 0.7]);
 
-% Initialize variables to store data
+% Initialize variable to store data
 data = cell(0, 2); % Cell array to store data: {filename, data}
 
 % Callback function for the Load Files button
@@ -25,27 +25,6 @@ function loadFiles(~, ~)
     % Populate the listbox with file names
     fileNames = {csvFiles.name};
     set(fileListbox, 'String', fileNames, 'Value', []);
-end
-
-% Callback function for listbox selection
-set(fileListbox, 'Callback', @selectFile);
-
-function selectFile(~, ~)
-    selectedIndices = get(fileListbox, 'Value');
-    
-    % Clear previous data
-    data = cell(0, 2);
-    
-    % Read data from selected CSV files and store in 'data' variable
-    for i = selectedIndices
-        filename = csvFiles(i).name;
-        fileData = csvread(filename);
-        data{end+1, 1} = filename;
-        data{end, 2} = fileData;
-    end
-    
-    % Update the plot with the selected data
-    plotSelectedData(data);
 end
 
 % Callback function to plot selected data
@@ -71,3 +50,6 @@ function plotSelectedData(selectedData)
     title(plotAxis, 'Multiple CSV Files Plot');
     legend(plotAxis, 'Location', 'best');
 end
+
+% Callback function for listbox selection
+set(loadButton, 'Callback', @loadFiles);
