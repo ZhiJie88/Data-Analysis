@@ -5,8 +5,11 @@ close all;
 % Create the main GUI figure
 mainFigure = figure('Name', 'CSV Data Plotter', 'Position', [100, 100, 400, 300]);
 
+% Initialize list of filenames
+fileNames = {};
+
 % Create listbox for file selection
-fileListbox = uicontrol('Style', 'listbox', 'Position', [20, 150, 150, 120], 'String', {});
+fileListbox = uicontrol('Style', 'listbox', 'Position', [20, 150, 150, 120], 'String', fileNames);
 
 % Create button to load files
 loadButton = uicontrol('Style', 'pushbutton', 'Position', [20, 120, 100, 20], 'String', 'Load Files', 'Callback', @loadFiles);
@@ -14,16 +17,15 @@ loadButton = uicontrol('Style', 'pushbutton', 'Position', [20, 120, 100, 20], 'S
 % Create axis for plotting
 plotAxis = axes('Parent', mainFigure, 'Position', [0.4, 0.1, 0.55, 0.7]);
 
-% Initialize variables to store data
-data = cell(0, 2); % Cell array to store data: {filename, data}
-
 % Callback function for the Load Files button
 function loadFiles(~, ~)
     % Get a list of CSV files in the current directory
     csvFiles = dir('*.csv');
     
-    % Populate the listbox with file names
+    % Extract filenames
     fileNames = {csvFiles.name};
+    
+    % Update listbox with file names
     set(fileListbox, 'String', fileNames, 'Value', []);
 end
 
@@ -38,7 +40,7 @@ function selectFile(~, ~)
     
     % Read data from selected CSV files and store in 'data' variable
     for i = selectedIndices
-        filename = csvFiles(i).name;
+        filename = fileNames{i};
         fileData = csvread(filename);
         data{end+1, 1} = filename;
         data{end, 2} = fileData;
