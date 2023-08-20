@@ -6,25 +6,19 @@ close all;
 mainFigure = figure('Name', 'CSV Data Plotter', 'Position', [100, 100, 400, 300]);
 
 % Create listbox for file selection
-fileListbox = uicontrol('Style', 'listbox', 'Position', [20, 150, 150, 120], 'String', {}, 'Max', 2);
+fileListbox = uicontrol('Style', 'listbox', 'Position', [20, 150, 150, 120], 'String', {});
 
 % Create button to load files
-loadButton = uicontrol('Style', 'pushbutton', 'Position', [20, 120, 100, 20], 'String', 'Load Files');
+loadButton = uicontrol('Style', 'pushbutton', 'Position', [20, 120, 100, 20], 'String', 'Load Files', 'Callback', @loadFiles);
 
 % Create axis for plotting
 plotAxis = axes('Parent', mainFigure, 'Position', [0.4, 0.1, 0.55, 0.7]);
 
-% Initialize variable to store data
+% Initialize variables to store data
 data = cell(0, 2); % Cell array to store data: {filename, data}
 
 % Callback function for the Load Files button
-set(loadButton, 'Callback', {@loadFiles, fileListbox});
-
-% Callback function for listbox selection
-set(fileListbox, 'Callback', {@selectFile, plotAxis});
-
-% Callback function to load files
-function loadFiles(~, ~, fileListbox)
+function loadFiles(~, ~)
     % Get a list of CSV files in the current directory
     csvFiles = dir('*.csv');
     
@@ -33,9 +27,11 @@ function loadFiles(~, ~, fileListbox)
     set(fileListbox, 'String', fileNames, 'Value', []);
 end
 
-% Callback function to plot selected data
-function selectFile(source, ~, plotAxis)
-    selectedIndices = get(source, 'Value');
+% Callback function for listbox selection
+set(fileListbox, 'Callback', @selectFile);
+
+function selectFile(~, ~)
+    selectedIndices = get(fileListbox, 'Value');
     
     % Clear previous data
     data = cell(0, 2);
@@ -49,11 +45,11 @@ function selectFile(source, ~, plotAxis)
     end
     
     % Update the plot with the selected data
-    plotSelectedData(data, plotAxis);
+    plotSelectedData(data);
 end
 
 % Callback function to plot selected data
-function plotSelectedData(selectedData, plotAxis)
+function plotSelectedData(selectedData)
     cla(plotAxis); % Clear the plot
     
     hold(plotAxis, 'on');
